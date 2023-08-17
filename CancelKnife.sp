@@ -85,6 +85,11 @@ public void OnMapEnd() {
 	g_arAllKnives.Clear();
 }
 
+public void OnClientPutInServer(int client) {
+	g_iClientTime[client] = 0;
+	g_iClientKnifer[client] = 0;
+}
+
 Action CheckAllKnives_Timer(Handle timer) {
 	if(g_bKnifeModeEnabled) {
 		g_hCheckAllKnivesTimer = null;
