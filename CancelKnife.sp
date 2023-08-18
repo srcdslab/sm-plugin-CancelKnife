@@ -381,6 +381,7 @@ void ClearData(CKnife knife) {
 	
 	for(int i = 0; i < knife.deadPeople.Length; i++) {
 		CKnifeRevert revert;
+		g_arAllKnives.GetArray(i, revert, sizeof(revert));
 		int human = GetClientOfUserId(revert.humanId);
 		if(human) {
 			g_iClientTime[human] = 0;
