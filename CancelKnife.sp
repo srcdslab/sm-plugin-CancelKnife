@@ -329,6 +329,10 @@ public void ZR_OnClientInfected(int client, int attacker, bool motherInfect) {
 		return;
 	}
 	
+	if(attacker <= 0 || attacker > MaxClients) {
+		return;
+	}
+	
 	if(g_iClientTime[attacker] < GetTime()) {
 		return;
 	}
