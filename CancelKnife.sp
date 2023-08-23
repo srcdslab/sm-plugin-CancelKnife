@@ -264,6 +264,7 @@ void RevertEverything(int admin, int userid) {
 			}
 		}
 
+		delete knife.deadPeople;
 		g_arAllKnives.Erase(i);
 		break;
 	}
