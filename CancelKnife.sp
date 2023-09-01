@@ -92,7 +92,7 @@ public Plugin myinfo = {
 	name		= "Cancel Knife",
 	author		= "Dolly, .Rushaway",
 	description	= "Allows admins to cancel the knife and revert all things that happened caused by that knife",
-	version		= "1.3",
+	version		= "1.4",
 	url			= ""
 };
 
@@ -490,6 +490,10 @@ void Event_RoundStart(Event event, const char[] name, bool dontBroadcast) {
 
 Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
 	if(!g_bMotherZombie) {
+		return Plugin_Continue;
+	}
+	
+	if(victim <= 0 || victim > MaxClients || attacker <= 0 || attacker > MaxClients) {
 		return Plugin_Continue;
 	}
 	
