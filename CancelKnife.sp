@@ -62,7 +62,6 @@ ArrayList g_arAllKnives;
 ConVar g_cvKnifeTime;
 ConVar g_cvSlayKnifer;
 ConVar g_cvKbanKnifer;
-ConVar g_cvKbanTime;
 ConVar g_cvKbanReason;
 ConVar g_cvPrintMessageType;
 
@@ -73,6 +72,7 @@ bool g_bMotherZombie = false;
 char g_sWeapon_Primary[MAXPLAYERS + 1][WEAPONS_MAX_LENGTH];
 char g_sWeapon_Secondary[MAXPLAYERS + 1][WEAPONS_MAX_LENGTH];
 
+int g_iClientTarget[MAXPLAYERS + 1];
 int g_iClientTime[MAXPLAYERS + 1];
 int g_iClientKnifer[MAXPLAYERS + 1];
 int g_iClientHealth[MAXPLAYERS + 1];
@@ -85,6 +85,7 @@ int g_iClientSmokegrenade[MAXPLAYERS + 1];
 int g_iClientIncendiary[MAXPLAYERS + 1];
 int g_iClientDecoy[MAXPLAYERS + 1];
 int g_iClientTactial[MAXPLAYERS + 1];
+int g_iClientSecondaryWeapon[MAXPLAYERS + 1]; // needed for entwatch but not really necessary
 int g_iClientInfectDamage[MAXPLAYERS + 1];
 
 
@@ -92,7 +93,7 @@ public Plugin myinfo = {
 	name		= "Cancel Knife",
 	author		= "Dolly, .Rushaway",
 	description	= "Allows admins to cancel the knife and revert all things that happened caused by that knife",
-	version		= "1.4",
+	version		= "1.5",
 	url			= ""
 };
 
@@ -115,18 +116,17 @@ public void OnPluginStart() {
 
 	g_cvKnifeTime = CreateConVar("sm_cknife_time", "15", "How many seconds to allow the admin to target the knifer after the incident?");
 	g_cvSlayKnifer = CreateConVar("sm_cknife_slay_knifer", "1", "Should we slay the knifer after canceling the knife?");
-	g_cvKbanKnifer = CreateConVar("sm_cknife_kban_knifer", "1", "Should we kban the knifer after canceling the knife?");
-	g_cvKbanTime = CreateConVar("sm_cknife_kban_duration", "-1", "Kban duration in minutes [-1 = temp | 0 = perm]");
+	g_cvKbanKnifer = CreateConVar("sm_cknife_kban_knifer", "1", "Open kban menu after canceling the knife?");
 	g_cvKbanReason = CreateConVar("sm_cknife_kban_reason", "Knifing (Admin reverting knife actions)", "Kban Reason");
 	g_cvPrintMessageType = CreateConVar("sm_cknife_print_message_type", "1", "Print Message type [0 = All Players | 1 = Admins only");
 
 	AutoExecConfig();
-	
+
 	for(int i = 1; i <= MaxClients; i++) {
 		if(!IsClientInGame(i)) {
 			continue;
 		}
-		
+
 		OnClientPutInServer(i);
 	}
 }
@@ -169,6 +169,7 @@ public void OnClientPutInServer(int client) {
 
 public void OnClientDisconnect(int client) {
 	ResetClient(client);
+	SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 }
 
 Action CheckAllKnives_Timer(Handle timer) {
@@ -193,7 +194,7 @@ Action CheckAllKnives_Timer(Handle timer) {
 		if(knivesCount != g_arAllKnives.Length) {
 			return Plugin_Handled;
 		}
-		
+
 		CKnife knife;
 		g_arAllKnives.GetArray(i, knife, sizeof(knife));
 		if (knife.time < GetTime()) {
@@ -215,7 +216,7 @@ Action Command_CKnife(int client, int args) {
 		CReplyToCommand(client, "Idiot, how come would there be knife actions if no zombie got infected yet?");
 		return Plugin_Handled;
 	}
-	
+
 	if (g_arAllKnives == null || g_arAllKnives.Length == 0) {
 		CReplyToCommand(client, "No active knives found!");
 		return Plugin_Handled;
@@ -282,10 +283,11 @@ int Menu_Callback(Menu menu, MenuAction action, int param1, int param2) {
 				CPrintToChat(param1, "Idiot, how come would there be knife actions if no zombie got infected yet?");
 				return 0;
 			}
-			
+
 			char info[8];
 			menu.GetItem(param2, info, sizeof(info));
 			int kniferUserid = StringToInt(info);
+			g_iClientTarget[param1] = kniferUserid;
 
 			RevertEverything(param1, kniferUserid);
 			Command_CKnife(param1, 0);
@@ -322,9 +324,8 @@ void RevertEverything(int admin, int userid) {
 
 		if (g_cvKbanKnifer.BoolValue) {
 			if (knifer && IsClientInGame(knifer)) {
-				char reason[64];
-				g_cvKbanReason.GetString(reason, sizeof(reason));
-				KR_BanClient(admin, knifer, g_cvKbanTime.IntValue, reason);
+				if (!KR_ClientStatus(knifer))
+					Kban_MenuDuration(admin);
 			}
 		}
 
@@ -344,11 +345,16 @@ void RevertEverything(int admin, int userid) {
 				ZR_HumanClient(human);
 
 				RestoreHealthAndArmor(human);
-	
+
 				// Restore Equiements + Weapons
 				SetEntProp(human, Prop_Send, "m_bHasNightVision", g_iClientNvg[human]);
 				GivePlayerItem(human, g_sWeapon_Primary[human]);
-				GivePlayerItem(human, g_sWeapon_Secondary[human]);
+				int secondaryWeapon;
+				if((secondaryWeapon = EntRefToEntIndex(g_iClientSecondaryWeapon[human])) > 0 && IsValidEntity(secondaryWeapon)) {
+					EquipPlayerWeapon(human, secondaryWeapon);
+				} else {
+					GivePlayerItem(human, g_sWeapon_Secondary[human]);
+				}
 
 				// Nades
 				GiveGrenadesToClient(human, g_iClientHEGrenade[human], g_bIsCSGO ? GrenadeType_HEGrenadeCSGO : GrenadeType_HEGrenade);
@@ -367,7 +373,7 @@ void RevertEverything(int admin, int userid) {
 				CPrintToChatAdmins(message);
 			}
 		}
-	
+
 		LogAction(admin, -1, "[CancelKnife] \"%L\" has reverted the knife made by %s on %s.", admin, knife.attackerName, knife.victimName);
 		ClearData(knife);
 		delete knife.deadPeople;
@@ -378,6 +384,65 @@ void RevertEverything(int admin, int userid) {
 	if (!found) {
 		CPrintToChat(admin, "You want to deal with this knife ? F*ck you, be faster next time.");
 	}
+}
+
+void Kban_MenuDuration(int client) {
+	Menu menu = new Menu(KbRestrict_Lengths);
+	menu.SetTitle("[Kb-Restrict] Choose a duration");
+	
+	if (CheckCommandAccess(client, "sm_rcon", ADMFLAG_RCON, true))
+		menu.AddItem("0", "Permanently");
+	menu.AddItem("60", "1 hour");
+	menu.AddItem("120", "2 hours");
+	menu.AddItem("240", "4 hours");
+	menu.AddItem("720", "12 hours");
+	menu.AddItem("1440", "1 day");
+	menu.AddItem("2880", "2 days");
+	menu.AddItem("4320", "3 days");
+	menu.AddItem("10080", "1 week");
+	menu.AddItem("20160", "2 weeks");
+	menu.AddItem("40320", "1 month");
+	
+	menu.ExitBackButton = true;
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+int KbRestrict_Lengths(Menu menu, MenuAction action, int param1, int param2) {
+	switch(action) {
+		case MenuAction_End:
+			delete menu;
+
+		case MenuAction_Cancel: {
+			if(param2 == MenuCancel_ExitBack)
+				Command_CKnife(param1, 0);
+		}
+		
+		case MenuAction_Select: {
+			char buffer[64];
+			menu.GetItem(param2, buffer, sizeof(buffer));
+			int time = StringToInt(buffer);
+			int target = GetClientOfUserId(g_iClientTarget[param1]);
+
+			if(!target) {
+				CPrintToChat(param1, "This player is not valid anymore.");
+				return 0;
+			}
+	
+			if(IsValidClient(target)) {
+				if (!KR_ClientStatus(target)) {
+					char reason[64];
+					g_cvKbanReason.GetString(reason, sizeof(reason));
+					KR_BanClient(param1, target, time, reason);
+				} else {
+					CPrintToChat(param2, "This player is already restricted.");
+				}
+			} else {
+				CPrintToChat(param2, "This player is not valid anymore.");
+			}
+		}
+	}
+
+	return 0;
 }
 
 void PrintCKnifeMessage(const char[] message) {
@@ -406,7 +471,7 @@ int GetKnivesCount(char[] targetName) {
 			count++;
 		}
 	}
-	
+
 	return count;
 }
 
@@ -418,7 +483,7 @@ Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
 	if(!g_bMotherZombie) {
 		return Plugin_Continue;
 	}
-	
+
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 
@@ -431,7 +496,7 @@ Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
 	if(!isKnife) {
 		return Plugin_Continue;
 	}
-	
+
 	char weapon[WEAPONS_MAX_LENGTH];
 	event.GetString("weapon", weapon, sizeof(weapon));
 	if (!StrEqual(weapon, "knife")) {
@@ -465,8 +530,8 @@ Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
 		g_arAllKnives.GetArray(i, tempKnife, sizeof(tempKnife));
 
 		if (tempKnife.attackerUserId == knife.attackerUserId && tempKnife.victimUserId == knife.victimUserId) {
-			delete tempKnife.deadPeople;
-			g_arAllKnives.Erase(i);
+			tempKnife.time = knife.time;
+			g_arAllKnives.SetArray(i, tempKnife, sizeof(tempKnife));
 			break;
 		}
 	}
@@ -484,7 +549,7 @@ void Event_RoundStart(Event event, const char[] name, bool dontBroadcast) {
 	for (int i = 1; i <= MaxClients; i++) {
 		ResetClient(i);
 	}
-	
+
 	g_bMotherZombie = false;
 }
 
@@ -492,15 +557,15 @@ Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, in
 	if(!g_bMotherZombie) {
 		return Plugin_Continue;
 	}
-	
+
 	if(victim <= 0 || victim > MaxClients || attacker <= 0 || attacker > MaxClients) {
 		return Plugin_Continue;
 	}
-	
-	if(!(ZR_IsClientZombie(attacker) && ZR_IsClientHuman(victim))) {
+
+	if(!(IsPlayerAlive(attacker) && IsPlayerAlive(victim) && ZR_IsClientZombie(attacker) && ZR_IsClientHuman(victim))) {
 		return Plugin_Continue;
 	}
-	
+
 	g_iClientHealth[victim] = GetClientHealth(victim);
 	g_iClientInfectDamage[victim] = RoundToNearest(damage);
 	return Plugin_Continue;
@@ -523,7 +588,7 @@ public Action ZR_OnClientInfect(int &client, int &attacker, bool &motherInfect) 
 	if(client == g_iClientKnifer[attacker]) {
 		return Plugin_Continue;
 	}
-	
+
 	g_iClientTime[client] = g_iClientTime[attacker];
 	g_iClientKnifer[client] = g_iClientKnifer[attacker];
 
@@ -547,7 +612,7 @@ public Action ZR_OnClientInfect(int &client, int &attacker, bool &motherInfect) 
 			knife.deadPeople.PushArray(knifeRevert);
 		}
 	}
-	
+
 	return Plugin_Continue;
 }
 
@@ -597,13 +662,13 @@ stock void RestoreHealthAndArmor(int human) {
 		} else if(health > 100) {
 			health = 100;
 		}
-		
+
 		//PrintToChatAll("Stored health: %d \n Infect damage: %d \n New health: %d", g_iClientHealth[human], g_iClientInfectDamage[human], health);
 		SetEntProp(human, Prop_Send, "m_iHealth", health);
 	} else {
 		SetEntProp(human, Prop_Send, "m_iHealth", 100); // <1 = Create non dead player..
 	}
-	
+
 	SetEntProp(human, Prop_Send, "m_ArmorValue", g_iClientArmor[human], 1);
 	SetEntProp(human, Prop_Send, "m_bHasHelmet", g_iClientHelmet[human], 1);
 }
@@ -646,6 +711,7 @@ stock void GetClientMainWeapons(int client)
 		}
 
 		if (view_as<WeaponsSlot>(x) == Slot_Secondary) {
+			g_iClientSecondaryWeapon[client] = EntIndexToEntRef(weapons[x]);
 			GetEdictClassname(weapons[x], entityname, sizeof(entityname));
 			g_sWeapon_Secondary[client] = entityname;
 			continue;
@@ -661,4 +727,8 @@ stock void GiveGrenadesToClient(int client, int iAmount, WeaponAmmoGrenadeType t
 		int iGrenadeCount = GetEntData(client, iToolsAmmo + (view_as<int>(type) * 4));
 		SetEntData(client, iToolsAmmo + (view_as<int>(type) * 4), iGrenadeCount + iAmount, _, true);
 	}
+}
+
+bool IsValidClient(int client) {
+	return (1 <= client <= MaxClients && IsClientInGame(client) && !IsClientSourceTV(client));
 }
