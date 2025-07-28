@@ -93,7 +93,7 @@ public Plugin myinfo = {
 	name		= "Cancel Knife",
 	author		= "Dolly, .Rushaway",
 	description	= "Allows admins to cancel the knife and revert all things that happened caused by that knife",
-	version		= "1.5",
+	version		= "1.6.0",
 	url			= ""
 };
 
@@ -141,7 +141,7 @@ public void OnLibraryAdded(const char[] name) {
 	}
 
 	delete g_hCheckAllKnivesTimer;
-	g_hCheckAllKnivesTimer = CreateTimer(1.0, CheckAllKnives_Timer, _, TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
+	g_hCheckAllKnivesTimer = CreateTimer(60.0, CheckAllKnives_Timer, _, TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
 }
 
 public void OnLibraryRemoved(const char[] name) {
@@ -245,6 +245,7 @@ void OpenCKnifeMenu(int client, char[] targetName = "") {
 	Menu menu = new Menu(Menu_Callback);
 	menu.SetTitle("[Knife Cancel] Active Knives!");
 
+	bool found = false;
 	for (int i = 0; i < g_arAllKnives.Length; i++) {
 		CKnife knife;
 		g_arAllKnives.GetArray(i, knife, sizeof(knife));
@@ -253,6 +254,7 @@ void OpenCKnifeMenu(int client, char[] targetName = "") {
 			continue;
 		}
 
+		found = true;
 		char itemTitle[120];
 		FormatEx(itemTitle, sizeof(itemTitle), "[Expire in: %ds] Knifer: %s | Zombie: %s", knife.time - GetTime(), knife.attackerName, knife.victimName);
 
@@ -260,7 +262,7 @@ void OpenCKnifeMenu(int client, char[] targetName = "") {
 		IntToString(knife.attackerUserId, itemInfo, sizeof(itemInfo));
 
 		if (targetName[0]) {
-			if (StrContains(knife.attackerName, targetName) != -1 || StrContains(knife.victimName, targetName) != -1) {
+			if (StrContains(knife.attackerName, targetName, false) != -1 || StrContains(knife.victimName, targetName, false) != -1) {
 				menu.AddItem(itemInfo, itemTitle);
 			}
 		} else {
@@ -268,6 +270,10 @@ void OpenCKnifeMenu(int client, char[] targetName = "") {
 		}
 	}
 
+	if(!found) {
+		CPrintToChat(client, "No active knives found!");
+	}
+	
 	menu.ExitButton = true;
 	menu.Display(client, g_cvKnifeTime.IntValue);
 }
@@ -462,12 +468,12 @@ void CPrintToChatAdmins(const char[] message) {
 	}
 }
 
-int GetKnivesCount(char[] targetName) {
+int GetKnivesCount(const char[] targetName) {
 	int count;
 	for (int i = 0; i < g_arAllKnives.Length; i++) {
 		CKnife knife;
 		g_arAllKnives.GetArray(i, knife, sizeof(knife));
-		if (StrContains(knife.attackerName, targetName) != -1 || StrContains(knife.victimName, targetName) != -1) {
+		if (StrContains(knife.attackerName, targetName, false) != -1 || StrContains(knife.victimName, targetName, false) != -1) {
 			count++;
 		}
 	}
@@ -529,10 +535,11 @@ Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
 		CKnife tempKnife;
 		g_arAllKnives.GetArray(i, tempKnife, sizeof(tempKnife));
 
+		// if cknife action existed before with the same knifer and zombie
 		if (tempKnife.attackerUserId == knife.attackerUserId && tempKnife.victimUserId == knife.victimUserId) {
 			tempKnife.time = knife.time;
 			g_arAllKnives.SetArray(i, tempKnife, sizeof(tempKnife));
-			break;
+			return Plugin_Continue;
 		}
 	}
 
