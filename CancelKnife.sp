@@ -63,7 +63,6 @@ enum struct PlayerData {
 	char weaponPrimaryStr[WEAPONS_MAX_LENGTH];
 	char weaponSecondaryStr[WEAPONS_MAX_LENGTH];
 	
-	int target;
 	int time;
 	int knifer;
 	int health;
@@ -80,7 +79,7 @@ enum struct PlayerData {
 	
 	void Reset() {
 		this.weaponPrimaryStr[0] = '\0'; this.weaponSecondaryStr[0] = '\0';
-		this.target = 0; this.time = 0; this.knifer = 0; this.health = 0;
+		this.time = 0; this.knifer = 0; this.health = 0;
 		this.helmet = 0; this.armor = 0; this.nvg = 0; this.hegrenade = 0; this.smoke = 0;
 		
 		if(g_bIsCSGO) {
@@ -100,7 +99,7 @@ public Plugin myinfo = {
 	name		= "Cancel Knife",
 	author		= "Dolly, .Rushaway",
 	description	= "Allows admins to cancel the knife and revert all things that happened caused by that knife",
-	version		= "1.6.2",
+	version		= "1.6.3",
 	url			= "https://nide.gg"
 };
 
@@ -297,7 +296,6 @@ int Menu_Callback(Menu menu, MenuAction action, int param1, int param2) {
 			char info[8];
 			menu.GetItem(param2, info, sizeof(info));
 			int kniferUserid = StringToInt(info);
-			g_PlayerData[param1].target = kniferUserid;
 
 			RevertEverything(param1, kniferUserid);
 			Command_CKnife(param1, 0);
@@ -335,7 +333,7 @@ void RevertEverything(int admin, int userid) {
 		if (g_cvKbanKnifer.BoolValue) {
 			if (knifer && IsClientInGame(knifer)) {
 				if (!KR_ClientStatus(knifer))
-					Kban_MenuDuration(admin);
+					KR_DisplayLengthsMenu(admin, knifer, KR_Menu_OnLengthClick);
 			}
 		}
 
@@ -395,63 +393,11 @@ void RevertEverything(int admin, int userid) {
 	}
 }
 
-void Kban_MenuDuration(int client) {
-	Menu menu = new Menu(KbRestrict_Lengths);
-	menu.SetTitle("[Kb-Restrict] Choose a duration");
-	
-	if (CheckCommandAccess(client, "sm_rcon", ADMFLAG_RCON, true))
-		menu.AddItem("0", "Permanently");
-	menu.AddItem("60", "1 hour");
-	menu.AddItem("120", "2 hours");
-	menu.AddItem("240", "4 hours");
-	menu.AddItem("720", "12 hours");
-	menu.AddItem("1440", "1 day");
-	menu.AddItem("2880", "2 days");
-	menu.AddItem("4320", "3 days");
-	menu.AddItem("10080", "1 week");
-	menu.AddItem("20160", "2 weeks");
-	menu.AddItem("40320", "1 month");
-	
-	menu.ExitBackButton = true;
-	menu.Display(client, MENU_TIME_FOREVER);
-}
-
-int KbRestrict_Lengths(Menu menu, MenuAction action, int param1, int param2) {
-	switch(action) {
-		case MenuAction_End:
-			delete menu;
-
-		case MenuAction_Cancel: {
-			if(param2 == MenuCancel_ExitBack)
-				Command_CKnife(param1, 0);
-		}
-		
-		case MenuAction_Select: {
-			char buffer[64];
-			menu.GetItem(param2, buffer, sizeof(buffer));
-			int time = StringToInt(buffer);
-			int target = GetClientOfUserId(g_PlayerData[param1].target);
-
-			if(!target) {
-				CPrintToChat(param1, "This player is not valid anymore.");
-				return 0;
-			}
-	
-			if(IsValidClient(target)) {
-				if (!KR_ClientStatus(target)) {
-					char reason[64];
-					g_cvKbanReason.GetString(reason, sizeof(reason));
-					KR_BanClient(param1, target, time, reason);
-				} else {
-					CPrintToChat(param2, "This player is already restricted.");
-				}
-			} else {
-				CPrintToChat(param2, "This player is not valid anymore.");
-			}
-		}
-	}
-
-	return 0;
+/* For the KBan Lengths Menu */
+void KR_Menu_OnLengthClick(int admin, int target, int time) {
+	char reason[64];
+	g_cvKbanReason.GetString(reason, sizeof(reason));
+	KR_BanClient(admin, target, time, reason);
 }
 
 void PrintCKnifeMessage(const char[] message) {
@@ -704,8 +650,4 @@ stock void GiveGrenadesToClient(int client, int iAmount, WeaponAmmoGrenadeType t
 		int iGrenadeCount = GetEntData(client, iToolsAmmo + (view_as<int>(type) * 4));
 		SetEntData(client, iToolsAmmo + (view_as<int>(type) * 4), iGrenadeCount + iAmount, _, true);
 	}
-}
-
-bool IsValidClient(int client) {
-	return (1 <= client <= MaxClients && IsClientInGame(client) && !IsClientSourceTV(client));
 }
