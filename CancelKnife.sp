@@ -9,6 +9,10 @@
 #include <zombiereloaded>
 #include <KnockbackRestrict>
 
+#undef REQUIRE_PLUGIN
+#tryinclude <knifemode>
+#define REQUIRE_PLUGIN
+
 #define WEAPONS_MAX_LENGTH 32
 #define WEAPONS_SLOTS_MAX 5
 
@@ -82,7 +86,7 @@ public Plugin myinfo = {
 	name		= "Cancel Knife",
 	author		= "Dolly, .Rushaway",
 	description	= "Allows admins to cancel the knife and revert all things that happened caused by that knife",
-	version		= "1.6.0",
+	version		= "1.6.1",
 	url			= ""
 };
 
@@ -118,23 +122,10 @@ public void OnPluginStart() {
 		OnClientPutInServer(i);
 	}
 }
+
 public void OnAllPluginsLoaded() {
-	g_bKnifeModeEnabled = LibraryExists("KnifeMode");
-}
-
-public void OnLibraryAdded(const char[] name) {
-	if (StrEqual(name, "KnifeMode")) {
-		g_bKnifeModeEnabled = true;
-	}
-
 	delete g_hCheckAllKnivesTimer;
 	g_hCheckAllKnivesTimer = CreateTimer(1.0, CheckAllKnives_Timer, _, TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
-}
-
-public void OnLibraryRemoved(const char[] name) {
-	if (StrEqual(name, "KnifeMode")) {
-		g_bKnifeModeEnabled = false;
-	}
 }
 
 public void OnMapEnd() {
@@ -705,3 +696,10 @@ bool IsValidClient(int client)
 {
 	return (1 <= client <= MaxClients && IsClientInGame(client) && !IsClientSourceTV(client));
 }
+
+#if defined _KnifeMode_Included
+public void KnifeMode_OnToggle(bool bEnabled)
+{
+	g_bKnifeModeEnabled = bEnabled;
+}
+#endif
