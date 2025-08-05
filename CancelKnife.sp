@@ -34,12 +34,6 @@ enum WeaponAmmoGrenadeType
 	GrenadeType_HEGrenade           = 11,   /** CSS - HEGrenade slot */
 	GrenadeType_Flashbang           = 12,   /** CSS - Flashbang slot. */
 	GrenadeType_Smokegrenade        = 13,   /** CSS - Smokegrenade slot. */
-	GrenadeType_HEGrenadeCSGO       = 14,   /** CSGO - HEGrenade slot. */
-	GrenadeType_FlashbangCSGO       = 15,   /** CSGO - Flashbang slot. */
-	GrenadeType_SmokegrenadeCSGO    = 16,   /** CSGO - Smokegrenade slot. */
-	GrenadeType_Incendiary          = 17,   /** CSGO - Incendiary and Molotov slot. */
-	GrenadeType_Decoy               = 18,   /** CSGO - Decoy slot. */
-	GrenadeType_Tactical            = 22,   /** CSGO - Tactical slot. */
 }
 
 enum WeaponsSlot
@@ -51,7 +45,6 @@ enum WeaponsSlot
 	Slot_Projectile     = 3,    /** Projectile (grenades, flashbangs, etc) weapon slot. */
 	Slot_Explosive      = 4,    /** Explosive (c4) weapon slot. */
 	Slot_NVGs           = 5,    /** NVGs (fake) equipment slot. */
-	Slot_DangerZone     = 11,   /** Dangerzone equipment slot. (CSGO only) */
 	Slot_MAXSIZE
 }
 
@@ -65,7 +58,6 @@ ConVar g_cvKbanKnifer;
 ConVar g_cvKbanReason;
 ConVar g_cvPrintMessageType;
 
-bool g_bIsCSGO = false;
 bool g_bKnifeModeEnabled = false;
 bool g_bMotherZombie = false;
 
@@ -82,9 +74,6 @@ int g_iClientNvg[MAXPLAYERS + 1];
 int g_iClientHEGrenade[MAXPLAYERS + 1];
 int g_iClientFlashbang[MAXPLAYERS + 1];
 int g_iClientSmokegrenade[MAXPLAYERS + 1];
-int g_iClientIncendiary[MAXPLAYERS + 1];
-int g_iClientDecoy[MAXPLAYERS + 1];
-int g_iClientTactial[MAXPLAYERS + 1];
 int g_iClientSecondaryWeapon[MAXPLAYERS + 1]; // needed for entwatch but not really necessary
 int g_iClientInfectDamage[MAXPLAYERS + 1];
 
@@ -93,12 +82,11 @@ public Plugin myinfo = {
 	name		= "Cancel Knife",
 	author		= "Dolly, .Rushaway",
 	description	= "Allows admins to cancel the knife and revert all things that happened caused by that knife",
-	version		= "1.5",
+	version		= "1.6.0",
 	url			= ""
 };
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
-	g_bIsCSGO = (GetEngineVersion() == Engine_CSGO);
 	RegPluginLibrary("CancelKnife");
 	return APLRes_Success;
 }
@@ -130,7 +118,6 @@ public void OnPluginStart() {
 		OnClientPutInServer(i);
 	}
 }
-
 public void OnAllPluginsLoaded() {
 	g_bKnifeModeEnabled = LibraryExists("KnifeMode");
 }
@@ -357,14 +344,9 @@ void RevertEverything(int admin, int userid) {
 				}
 
 				// Nades
-				GiveGrenadesToClient(human, g_iClientHEGrenade[human], g_bIsCSGO ? GrenadeType_HEGrenadeCSGO : GrenadeType_HEGrenade);
-				GiveGrenadesToClient(human, g_iClientFlashbang[human], g_bIsCSGO ? GrenadeType_FlashbangCSGO : GrenadeType_Flashbang);
-				GiveGrenadesToClient(human, g_iClientSmokegrenade[human], g_bIsCSGO ? GrenadeType_SmokegrenadeCSGO : GrenadeType_Smokegrenade);
-				if (g_bIsCSGO) {
-					GiveGrenadesToClient(human, g_iClientIncendiary[human], GrenadeType_Incendiary);
-					GiveGrenadesToClient(human, g_iClientDecoy[human], GrenadeType_Decoy);
-					GiveGrenadesToClient(human, g_iClientTactial[human], GrenadeType_Tactical);
-				}
+				GiveGrenadesToClient(human, g_iClientHEGrenade[human], GrenadeType_HEGrenade);
+				GiveGrenadesToClient(human, g_iClientFlashbang[human], GrenadeType_Flashbang);
+				GiveGrenadesToClient(human, g_iClientSmokegrenade[human], GrenadeType_Smokegrenade);
 
 				FormatEx(message, sizeof(message), "The knife has been reverted. {olive}%N {default}has been revived as a {green}Human!", human);
 				PrintCKnifeMessage(message);
@@ -499,7 +481,7 @@ Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
 
 	char weapon[WEAPONS_MAX_LENGTH];
 	event.GetString("weapon", weapon, sizeof(weapon));
-	if (!StrEqual(weapon, "knife")) {
+	if (strcmp(weapon, "knife", false) != 0) {
 		return Plugin_Continue;
 	}
 
@@ -571,22 +553,23 @@ Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, in
 	return Plugin_Continue;
 }
 
-public Action ZR_OnClientInfect(int &client, int &attacker, bool &motherInfect) {
+public void ZR_OnClientInfected(int client, int attacker, bool motherInfect, bool respawnOverride, bool respawn) {
+
 	if (motherInfect) {
 		g_bMotherZombie = true;
-		return Plugin_Continue;
+		return;
 	}
 
 	if (attacker <= 0 || attacker > MaxClients) {
-		return Plugin_Continue;
+		return;
 	}
 
 	if (g_iClientTime[attacker] < GetTime()) {
-		return Plugin_Continue;
+		return;
 	}
 
 	if(client == g_iClientKnifer[attacker]) {
-		return Plugin_Continue;
+		return;
 	}
 
 	g_iClientTime[client] = g_iClientTime[attacker];
@@ -613,7 +596,7 @@ public Action ZR_OnClientInfect(int &client, int &attacker, bool &motherInfect) 
 		}
 	}
 
-	return Plugin_Continue;
+	return;
 }
 
 void ResetClient(int client) {
@@ -629,12 +612,6 @@ void ResetClient(int client) {
 	g_iClientSmokegrenade[client] = 0;
 	FormatEx(g_sWeapon_Primary[client], sizeof(g_sWeapon_Primary[]), "");
 	FormatEx(g_sWeapon_Secondary[client], sizeof(g_sWeapon_Secondary[]), "");
-
-	if (g_bIsCSGO) {
-		g_iClientIncendiary[client] = 0;
-		g_iClientDecoy[client] = 0;
-		g_iClientTactial[client] = 0;
-	}
 }
 
 void ClearData(CKnife knife) {
@@ -680,14 +657,9 @@ stock void SaveClientData(int victim)
 	g_iClientHelmet[victim] = GetEntProp(victim, Prop_Send, "m_bHasHelmet");
 	g_iClientNvg[victim] = GetEntProp(victim, Prop_Send, "m_bHasNightVision");
 
-	g_iClientHEGrenade[victim] = GetEntProp(victim, Prop_Data, "m_iAmmo", _, g_bIsCSGO ? 14 : 11);
-	g_iClientFlashbang[victim] = GetEntProp(victim, Prop_Data, "m_iAmmo", _, g_bIsCSGO ? 15: 12);
-	g_iClientSmokegrenade[victim] = GetEntProp(victim, Prop_Data, "m_iAmmo", _, g_bIsCSGO ? 16: 13);
-	if (g_bIsCSGO) {
-		g_iClientIncendiary[victim] = GetEntProp(victim, Prop_Data, "m_iAmmo", _, 17);
-		g_iClientDecoy[victim] = GetEntProp(victim, Prop_Data, "m_iAmmo", _, 18);
-		g_iClientTactial[victim] = GetEntProp(victim, Prop_Data, "m_iAmmo", _, 22);
-	}
+	g_iClientHEGrenade[victim] = GetEntProp(victim, Prop_Data, "m_iAmmo", _, 11);
+	g_iClientFlashbang[victim] = GetEntProp(victim, Prop_Data, "m_iAmmo", _, 12);
+	g_iClientSmokegrenade[victim] = GetEntProp(victim, Prop_Data, "m_iAmmo", _, 13);
 
 	GetClientMainWeapons(victim);
 }
@@ -729,6 +701,7 @@ stock void GiveGrenadesToClient(int client, int iAmount, WeaponAmmoGrenadeType t
 	}
 }
 
-bool IsValidClient(int client) {
+bool IsValidClient(int client)
+{
 	return (1 <= client <= MaxClients && IsClientInGame(client) && !IsClientSourceTV(client));
 }
