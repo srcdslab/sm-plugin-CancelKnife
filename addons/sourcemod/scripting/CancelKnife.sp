@@ -53,7 +53,7 @@ bool g_bMotherZombie = false;
 enum struct PlayerData {
 	char weaponPrimaryStr[WEAPONS_MAX_LENGTH];
 	char weaponSecondaryStr[WEAPONS_MAX_LENGTH];
-	
+
 	int time;
 	int knifer;
 	int health;
@@ -63,15 +63,14 @@ enum struct PlayerData {
 	int hegrenade;
 	int flash;
 	int smoke;
-	
+
 	int weaponSecondary;
 	int infectDamage;
-	
+
 	void Reset() {
 		this.weaponPrimaryStr[0] = '\0'; this.weaponSecondaryStr[0] = '\0';
 		this.time = 0; this.knifer = 0; this.health = 0;
 		this.helmet = 0; this.armor = 0; this.nvg = 0; this.hegrenade = 0; this.flash = 0; this.smoke = 0;
-		
 		this.weaponSecondary = -1;
 		this.infectDamage = 0;
 	}
@@ -83,8 +82,8 @@ public Plugin myinfo = {
 	name		= "Cancel Knife",
 	author		= "Dolly, .Rushaway",
 	description	= "Allows admins to cancel the knife and revert all things that happened caused by that knife",
-	version		= "1.6.4",
-	url			= "https://nide.gg"
+	version		= "1.6.2",
+	url			= "https://github.com/srcdslab/sm-plugin-CancelKnife"
 };
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
@@ -111,8 +110,8 @@ public void OnPluginStart() {
 
 	AutoExecConfig();
 
-	for(int i = 1; i <= MaxClients; i++) {
-		if(!IsClientInGame(i)) {
+	for (int i = 1; i <= MaxClients; i++) {
+		if (!IsClientInGame(i)) {
 			continue;
 		}
 
@@ -161,7 +160,7 @@ Action CheckAllKnives_Timer(Handle timer) {
 
 	for (int i = 0; i < knivesCount; i++) {
 		// Just incase a knife was deleted while this timer is being called
-		if(knivesCount != g_arAllKnives.Length) {
+		if (knivesCount != g_arAllKnives.Length) {
 			return Plugin_Handled;
 		}
 
@@ -182,7 +181,7 @@ Action Command_CKnife(int client, int args) {
 		return Plugin_Handled;
 	}
 
-	if(!g_bMotherZombie) {
+	if (!g_bMotherZombie) {
 		CReplyToCommand(client, "Idiot, how come would there be knife actions if no zombie got infected yet?");
 		return Plugin_Handled;
 	}
@@ -240,10 +239,10 @@ void OpenCKnifeMenu(int client, char[] targetName = "") {
 		}
 	}
 
-	if(!found) {
+	if (!found) {
 		CPrintToChat(client, "No active knives found!");
 	}
-	
+
 	menu.ExitButton = true;
 	menu.Display(client, g_cvKnifeTime.IntValue);
 }
@@ -255,7 +254,7 @@ int Menu_Callback(Menu menu, MenuAction action, int param1, int param2) {
 		}
 
 		case MenuAction_Select: {
-			if(!g_bMotherZombie) {
+			if (!g_bMotherZombie) {
 				CPrintToChat(param1, "Idiot, how come would there be knife actions if no zombie got infected yet?");
 				return 0;
 			}
@@ -298,9 +297,8 @@ void RevertEverything(int admin, int userid) {
 		}
 
 		if (g_cvKbanKnifer.BoolValue) {
-			if (knifer && IsClientInGame(knifer)) {
-				if (!KR_ClientStatus(knifer))
-					KR_DisplayLengthsMenu(admin, knifer, KR_Menu_OnLengthClick);
+			if (knifer && IsClientInGame(knifer) && !KR_ClientStatus(knifer)) {
+				KR_DisplayLengthsMenu(admin, knifer, KR_Menu_OnLengthClick);
 			}
 		}
 
@@ -325,7 +323,7 @@ void RevertEverything(int admin, int userid) {
 				SetEntProp(human, Prop_Send, "m_bHasNightVision", g_PlayerData[human].nvg);
 				GivePlayerItem(human, g_PlayerData[human].weaponPrimaryStr);
 				int secondaryWeapon;
-				if((secondaryWeapon = EntRefToEntIndex(g_PlayerData[human].weaponSecondary)) > 0 && IsValidEntity(secondaryWeapon)) {
+				if ((secondaryWeapon = EntRefToEntIndex(g_PlayerData[human].weaponSecondary)) > 0 && IsValidEntity(secondaryWeapon)) {
 					EquipPlayerWeapon(human, secondaryWeapon);
 				} else {
 					GivePlayerItem(human, g_PlayerData[human].weaponSecondaryStr);
@@ -398,7 +396,7 @@ Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
 		return Plugin_Continue;
 	}
 
-	if(!g_bMotherZombie) {
+	if (!g_bMotherZombie) {
 		return Plugin_Continue;
 	}
 
@@ -412,7 +410,7 @@ Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
 	if(!(GetClientTeam(victim) == CS_TEAM_T && GetClientTeam(attacker) == CS_TEAM_CT)) {
 		return Plugin_Continue;
 	}
-	
+
 	char weapon[WEAPONS_MAX_LENGTH];
 	event.GetString("weapon", weapon, sizeof(weapon));
 	if (!StrEqual(weapon, "knife")) {
@@ -425,10 +423,10 @@ Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
 	}
 
 	// due to the new zombiereloaded knockback natives, damage will still be the same, only knockback will be changed
-	if(KR_ClientStatus(attacker)) {
+	if (KR_ClientStatus(attacker)) {
 		return Plugin_Continue;
 	}
-	
+
 	if (g_PlayerData[victim].time != 0 && g_PlayerData[victim].time < GetTime()) {
 		return Plugin_Continue;
 	}
@@ -476,15 +474,15 @@ void Event_RoundStart(Event event, const char[] name, bool dontBroadcast) {
 }
 
 Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype) {
-	if(!g_bMotherZombie) {
+	if (!g_bMotherZombie) {
 		return Plugin_Continue;
 	}
 
-	if(victim <= 0 || victim > MaxClients || attacker <= 0 || attacker > MaxClients) {
+	if (victim <= 0 || victim > MaxClients || attacker <= 0 || attacker > MaxClients) {
 		return Plugin_Continue;
 	}
 
-	if(!(IsPlayerAlive(attacker) && IsPlayerAlive(victim) && ZR_IsClientZombie(attacker) && ZR_IsClientHuman(victim))) {
+	if (!(IsPlayerAlive(attacker) && IsPlayerAlive(victim) && ZR_IsClientZombie(attacker) && ZR_IsClientHuman(victim))) {
 		return Plugin_Continue;
 	}
 
@@ -493,22 +491,22 @@ Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, in
 	return Plugin_Continue;
 }
 
-public Action ZR_OnClientInfect(int &client, int &attacker, bool &motherInfect) {
+public void ZR_OnClientInfected(int client, int attacker, bool motherInfect, bool respawnOverride, bool respawn) {
 	if (motherInfect) {
 		g_bMotherZombie = true;
-		return Plugin_Continue;
+		return;
 	}
 
 	if (attacker <= 0 || attacker > MaxClients) {
-		return Plugin_Continue;
+		return;
 	}
 
 	if (g_PlayerData[attacker].time < GetTime()) {
-		return Plugin_Continue;
+		return;
 	}
 
-	if(client == g_PlayerData[attacker].knifer) {
-		return Plugin_Continue;
+	if (client == g_PlayerData[attacker].knifer) {
+		return;
 	}
 
 	g_PlayerData[client].time = g_PlayerData[attacker].time;
@@ -534,8 +532,6 @@ public Action ZR_OnClientInfect(int &client, int &attacker, bool &motherInfect) 
 			knife.deadPeople.PushArray(knifeRevert);
 		}
 	}
-
-	return Plugin_Continue;
 }
 
 void ClearData(CKnife knife) {
@@ -558,9 +554,9 @@ stock void RestoreHealthAndArmor(int human) {
 	// Restore Health + Armor value
 	if (g_PlayerData[human].health >= 1) {
 		int health = g_PlayerData[human].health - g_PlayerData[human].infectDamage;
-		if(health <= 0) {
+		if (health <= 0) {
 			health = 1;
-		} else if(health > 100) {
+		} else if (health > 100) {
 			health = 100;
 		}
 
@@ -576,13 +572,13 @@ stock void RestoreHealthAndArmor(int human) {
 
 stock void SaveClientData(int victim)
 {
-	g_PlayerData[victim].armor 		= GetEntProp(victim, Prop_Send, "m_ArmorValue");
-	g_PlayerData[victim].helmet 	= GetEntProp(victim, Prop_Send, "m_bHasHelmet");
-	g_PlayerData[victim].nvg 		= GetEntProp(victim, Prop_Send, "m_bHasNightVision");
+	g_PlayerData[victim].armor = GetEntProp(victim, Prop_Send, "m_ArmorValue");
+	g_PlayerData[victim].helmet = GetEntProp(victim, Prop_Send, "m_bHasHelmet");
+	g_PlayerData[victim].nvg = GetEntProp(victim, Prop_Send, "m_bHasNightVision");
 
-	g_PlayerData[victim].hegrenade 	= GetEntProp(victim, Prop_Data, "m_iAmmo", _, view_as<int>(GrenadeType_HEGrenade));
-	g_PlayerData[victim].flash 		= GetEntProp(victim, Prop_Data, "m_iAmmo", _, view_as<int>(GrenadeType_Flashbang));
-	g_PlayerData[victim].smoke 		= GetEntProp(victim, Prop_Data, "m_iAmmo", _, view_as<int>(GrenadeType_Smokegrenade));
+	g_PlayerData[victim].hegrenade = GetEntProp(victim, Prop_Data, "m_iAmmo", _, view_as<int>(GrenadeType_HEGrenade));
+	g_PlayerData[victim].flash = GetEntProp(victim, Prop_Data, "m_iAmmo", _, view_as<int>(GrenadeType_Flashbang));
+	g_PlayerData[victim].smoke = GetEntProp(victim, Prop_Data, "m_iAmmo", _, view_as<int>(GrenadeType_Smokegrenade));
 
 	GetClientMainWeapons(victim);
 }
@@ -592,13 +588,13 @@ stock void GetClientMainWeapons(int client) {
 	char className[WEAPONS_MAX_LENGTH];
 
 	int primary = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
-	if(primary != -1) {
+	if (primary != -1) {
 		GetEntityClassname(primary, className, sizeof(className));
 		g_PlayerData[client].weaponPrimaryStr = className;
 	}
-	
+
 	int secondary = GetPlayerWeaponSlot(client, CS_SLOT_SECONDARY);
-	if(secondary != -1) {
+	if (secondary != -1) {
 		GetEntityClassname(secondary, className, sizeof(className));
 		g_PlayerData[client].weaponSecondaryStr = className;
 	}
