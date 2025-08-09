@@ -413,7 +413,7 @@ Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
 
 	char weapon[WEAPONS_MAX_LENGTH];
 	event.GetString("weapon", weapon, sizeof(weapon));
-	if (!StrEqual(weapon, "knife")) {
+	if (strcmp(weapon, "knife", false) != 0) {
 		return Plugin_Continue;
 	}
 
