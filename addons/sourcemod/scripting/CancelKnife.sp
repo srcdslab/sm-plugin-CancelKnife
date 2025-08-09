@@ -391,44 +391,44 @@ int GetKnivesCount(const char[] targetName) {
 	return count;
 }
 
-Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
+public void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
 	if (g_bKnifeModeEnabled) {
-		return Plugin_Continue;
+		return;
 	}
 
 	if (!g_bMotherZombie) {
-		return Plugin_Continue;
+		return;
 	}
 
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 
 	if (victim < 1 || victim > MaxClients || !IsClientInGame(victim) || attacker < 1 || attacker > MaxClients || !IsClientInGame(attacker)) {
-		return Plugin_Continue;
+		return;
 	}
 
 	if(!(GetClientTeam(victim) == CS_TEAM_T && GetClientTeam(attacker) == CS_TEAM_CT)) {
-		return Plugin_Continue;
+		return;
 	}
 
 	char weapon[WEAPONS_MAX_LENGTH];
 	event.GetString("weapon", weapon, sizeof(weapon));
 	if (strcmp(weapon, "knife", false) != 0) {
-		return Plugin_Continue;
+		return;
 	}
 
 	int damage = event.GetInt("dmg_health");
 	if (damage < 35.0) {
-		return Plugin_Continue;
+		return;
 	}
 
 	// due to the new zombiereloaded knockback natives, damage will still be the same, only knockback will be changed
 	if (KR_ClientStatus(attacker)) {
-		return Plugin_Continue;
+		return;
 	}
 
 	if (g_PlayerData[victim].time != 0 && g_PlayerData[victim].time < GetTime()) {
-		return Plugin_Continue;
+		return;
 	}
 
 	/* So knife happened now, we want to save the data of the knife */
@@ -452,7 +452,7 @@ Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
 		if (tempKnife.attackerUserId == knife.attackerUserId && tempKnife.victimUserId == knife.victimUserId) {
 			tempKnife.time = knife.time;
 			g_arAllKnives.SetArray(i, tempKnife, sizeof(tempKnife));
-			return Plugin_Continue;
+			return;
 		}
 	}
 
@@ -462,7 +462,7 @@ Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast) {
 
 	knife.deadPeople = new ArrayList(ByteCountToCells(64));
 	g_arAllKnives.PushArray(knife);
-	return Plugin_Continue;
+	return;
 }
 
 void Event_RoundStart(Event event, const char[] name, bool dontBroadcast) {
