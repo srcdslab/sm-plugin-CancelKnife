@@ -275,10 +275,16 @@ void RevertEverything(int admin, int userid) {
 	bool found = false;
 	char message[256];
 
+	int currentTime = GetTime();
 	for (int i = 0; i < g_arAllKnives.Length; i++) {
 		CKnife knife;
 		g_arAllKnives.GetArray(i, knife, sizeof(knife));
 		if (knife.attackerUserId != userid) {
+			continue;
+		}
+
+		if (knife.time < currentTime) {
+			g_arAllKnives.Erase(i);
 			continue;
 		}
 
@@ -346,7 +352,6 @@ void RevertEverything(int admin, int userid) {
 		ClearData(knife);
 		delete knife.deadPeople;
 		g_arAllKnives.Erase(i);
-		break;
 	}
 
 	if (!found) {
