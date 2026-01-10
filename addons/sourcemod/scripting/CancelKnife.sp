@@ -284,6 +284,8 @@ void RevertEverything(int admin, int userid) {
 		}
 
 		if (knife.time < currentTime) {
+			ClearData(knife);
+			delete knife.deadPeople;
 			g_arAllKnives.Erase(i);
 			continue;
 		}
