@@ -82,7 +82,7 @@ public Plugin myinfo = {
 	name		= "Cancel Knife",
 	author		= "Dolly, .Rushaway",
 	description	= "Allows admins to cancel the knife and revert all things that happened caused by that knife",
-	version		= "1.7.0",
+	version		= "1.7.1",
 	url			= "https://github.com/srcdslab/sm-plugin-CancelKnife"
 };
 
@@ -275,10 +275,18 @@ void RevertEverything(int admin, int userid) {
 	bool found = false;
 	char message[256];
 
+	int currentTime = GetTime();
 	for (int i = 0; i < g_arAllKnives.Length; i++) {
 		CKnife knife;
 		g_arAllKnives.GetArray(i, knife, sizeof(knife));
 		if (knife.attackerUserId != userid) {
+			continue;
+		}
+
+		if (knife.time < currentTime) {
+			ClearData(knife);
+			delete knife.deadPeople;
+			g_arAllKnives.Erase(i);
 			continue;
 		}
 
@@ -346,7 +354,6 @@ void RevertEverything(int admin, int userid) {
 		ClearData(knife);
 		delete knife.deadPeople;
 		g_arAllKnives.Erase(i);
-		break;
 	}
 
 	if (!found) {
