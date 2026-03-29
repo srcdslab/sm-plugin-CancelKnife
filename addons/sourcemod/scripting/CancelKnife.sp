@@ -251,7 +251,7 @@ void OpenCKnifeMenu(int client, char[] targetName = "", bool fromMenu = false) {
 
 		found = true;
 		char itemTitle[130];
-		FormatEx(itemTitle, sizeof(itemTitle), "[Expire in: %ds] Knifer: %s | Zombie: %s | Dead Humans: %d", knife.time - GetTime(), knife.attackerName, knife.victimName, knife.deadPeople.Length);
+		FormatEx(itemTitle, sizeof(itemTitle), "[Expire in: %ds] Knifer: %s | Zombie: %s | Dead Humans: %d", knife.time - currentTime, knife.attackerName, knife.victimName, knife.deadPeople.Length);
 
 		char itemInfo[8];
 		IntToString(knife.attackerUserId, itemInfo, sizeof(itemInfo));
