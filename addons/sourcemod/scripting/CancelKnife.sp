@@ -707,6 +707,7 @@ Action Timer_ReviveHuman(Handle timer, int userid)
 		return Plugin_Continue;
 
 	ReviveHuman(human);
+	return Plugin_Continue;
 }
 
 void ReviveHuman(int human) {
