@@ -375,7 +375,7 @@ void RevertEverything(int admin, int userid) {
 					ReviveHuman(human);
 				} else {
 					CS_RespawnPlayer(human);
-					RequestFrame(ReviveHuman, human);
+					CreateTimer(0.2, Timer_ReviveHuman, knifeRevert.humanId, TIMER_FLAG_NO_MAPCHANGE);
 				}
 
 				TeleportEntity(human, knifeRevert.pos);
@@ -698,6 +698,15 @@ stock void GiveGrenadesToClient(int client, int iAmount, WeaponAmmoGrenadeType t
 		int iGrenadeCount = GetEntData(client, iToolsAmmo + (view_as<int>(type) * 4));
 		SetEntData(client, iToolsAmmo + (view_as<int>(type) * 4), iGrenadeCount + iAmount, _, true);
 	}
+}
+
+Action Timer_ReviveHuman(Handle timer, int userid)
+{
+	int human = GetClientOfUserId(userid);
+	if (!human || !IsPlayerAlive(human))
+		return Plugin_Continue;
+
+	ReviveHuman(human);
 }
 
 void ReviveHuman(int human) {
