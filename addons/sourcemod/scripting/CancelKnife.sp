@@ -113,7 +113,7 @@ public void OnPluginStart() {
 	g_cvKbanKnifer = CreateConVar("sm_cknife_kban_knifer", "1", "Open kban menu after canceling the knife?");
 	g_cvKbanReason = CreateConVar("sm_cknife_kban_reason", "Knifing (Admin reverting knife actions)", "Kban Reason");
 	g_cvPrintMessageType = CreateConVar("sm_cknife_print_message_type", "1", "Print Message type [0 = All Players | 1 = Admins only");
-	
+
 	AutoExecConfig();
 
 	for (int i = 1; i <= MaxClients; i++) {
@@ -154,8 +154,35 @@ public void OnMapEnd() {
 	}
 
 	g_arAllKnives.Clear();
-	
+
 	g_bNemesis = false;
+}
+
+public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
+{
+	if (!client)
+		return Plugin_Continue;
+
+	if (sArgs[0] != '-')
+		return Plugin_Continue;
+
+	if (!(sArgs[1] == 'y' && (sArgs[2] == ' ' || sArgs[2] == '\0')))
+		return Plugin_Continue;
+
+	if (!g_bMotherZombie || g_arAllKnives == null)
+		return Plugin_Continue;
+
+	int totalKnives = g_arAllKnives.Length;
+	if (!totalKnives)
+		return Plugin_Continue;
+
+	if (!CheckCommandAccess(client, "sm_cknife", ADMFLAG_KICK, true))
+		return Plugin_Continue;
+
+	CKnife knife;
+	g_arAllKnives.GetArray(totalKnives - 1, knife, sizeof(knife));
+	RevertEverything(client, knife.attackerUserId);
+	return Plugin_Continue;
 }
 
 public void OnClientPutInServer(int client) {
@@ -323,7 +350,7 @@ void RevertEverything(int admin, int userid) {
 				ForcePlayerSuicide(knifer);
 				FormatEx(message, sizeof(message), "{red}%s {default}has been slayed for knifing {olive}%s{default}.", knife.attackerName, knife.victimName);
 				PrintCKnifeMessage(message);
-			} 
+			}
 		}
 
 		if (g_cvKbanKnifer.BoolValue) {
@@ -342,16 +369,21 @@ void RevertEverything(int admin, int userid) {
 		for (int j = 0; j < knife.deadPeople.Length; j++) {
 			CKnifeRevert knifeRevert;
 			knife.deadPeople.GetArray(j, knifeRevert, sizeof(knifeRevert));
+
+			// Never revive the original knifer; they stay punished.
+			if (knifeRevert.humanId == knife.attackerUserId) {
+				continue;
+			}
+
 			int human = GetClientOfUserId(knifeRevert.humanId);
 			if (human) {
 				if (IsPlayerAlive(human)) {
-					ZR_HumanClient(human);
 					ReviveHuman(human);
 				} else {
-					ZR_RespawnClient(human, ZR_Respawn_Human);
+					CS_RespawnPlayer(human);
 					RequestFrame(ReviveHuman, human);
 				}
-				
+
 				TeleportEntity(human, knifeRevert.pos);
 			} else {
 				FormatEx(message, sizeof(message), "Can't switch back {olive}%s {default}as human. The player is not alive.", knifeRevert.humanName);
@@ -441,14 +473,14 @@ public void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 
 	int victimTeam = GetClientTeam(victim);
 	int attackerTeam = GetClientTeam(attacker);
-	
+
 	if (g_bNemesis) {
 		if (victimTeam == CS_TEAM_CT && attackerTeam == CS_TEAM_T) {
 			AddDeadHuman(victim, attacker);
 			return;
-		}	
+		}
 	}
-	
+
 	if (!(victimTeam == CS_TEAM_T && attackerTeam == CS_TEAM_CT)) {
 		return;
 	}
@@ -518,6 +550,7 @@ void PublishKnife(int victim, int attacker, int victimId, int attackerId, int cu
 	char message[256];
 	FormatEx(message, sizeof(message), "New action available. ({blue}%s {default}X {red}%s{default})", knife.attackerName, knife.victimName);
 	CPrintToChatAdmins(message);
+	CPrintToChatAdmins("Quick revert: type {olive}-y {default}in chat to revert the latest knife.");
 
 	knife.deadPeople = new ArrayList(ByteCountToCells(64));
 	g_arAllKnives.PushArray(knife);
@@ -554,7 +587,7 @@ public void ZR_OnClientInfected(int client, int attacker, bool motherInfect, boo
 		g_bMotherZombie = true;
 		return;
 	}
-	
+
 	if (attacker <= 0 || attacker > MaxClients) {
 		return;
 	}
@@ -567,14 +600,15 @@ void AddDeadHuman(int client, int attacker) {
 		return;
 	}
 
-	if (client == g_PlayerData[attacker].knifer) {
+	int clientUserId = GetClientUserId(client);
+	if (clientUserId == g_PlayerData[attacker].knifer) {
 		return;
 	}
 
 	g_PlayerData[client].time = g_PlayerData[attacker].time;
 	g_PlayerData[client].knifer = g_PlayerData[attacker].knifer;
 
-	int humanId = GetClientUserId(client); 
+	int humanId = clientUserId;
 
 	float humanOrigin[3];
 	GetClientAbsOrigin(client, humanOrigin);
@@ -674,6 +708,8 @@ stock void GiveGrenadesToClient(int client, int iAmount, WeaponAmmoGrenadeType t
 }
 
 void ReviveHuman(int human) {
+	ZR_HumanClient(human);
+
 	RestoreHealthAndArmor(human);
 
 	// Restore Equiements + Weapons
@@ -690,7 +726,7 @@ void ReviveHuman(int human) {
 	GiveGrenadesToClient(human, g_PlayerData[human].hegrenade, GrenadeType_HEGrenade);
 	GiveGrenadesToClient(human, g_PlayerData[human].flash, GrenadeType_Flashbang);
 	GiveGrenadesToClient(human, g_PlayerData[human].smoke, GrenadeType_Smokegrenade);
-	
+
 	char message[256];
 	FormatEx(message, sizeof(message), "The knife has been reverted. {olive}%N {default}has been revived as a {green}Human!", human);
 	PrintCKnifeMessage(message);
