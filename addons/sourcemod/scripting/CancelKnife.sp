@@ -88,7 +88,7 @@ public Plugin myinfo = {
 	name		= "Cancel Knife",
 	author		= "Dolly, .Rushaway",
 	description	= "Allows admins to cancel the knife and revert all things that happened caused by that knife",
-	version		= "1.8.0",
+	version		= "1.7.1",
 	url			= "https://github.com/srcdslab/sm-plugin-CancelKnife"
 };
 
@@ -160,7 +160,7 @@ public void OnMapEnd() {
 
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
 {
-	if (!client)
+	if (!client || !g_bMotherZombie || g_arAllKnives == null || !CheckCommandAccess(client, "sm_cknife", ADMFLAG_KICK, true))
 		return Plugin_Continue;
 
 	if (sArgs[0] != '-')
@@ -168,15 +168,9 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 
 	if (!(sArgs[1] == 'y' && (sArgs[2] == ' ' || sArgs[2] == '\0')))
 		return Plugin_Continue;
-
-	if (!g_bMotherZombie || g_arAllKnives == null)
-		return Plugin_Continue;
-
-	int totalKnives = g_arAllKnives.Length;
-	if (!totalKnives)
-		return Plugin_Continue;
-
-	if (!CheckCommandAccess(client, "sm_cknife", ADMFLAG_KICK, true))
+		
+	int totalKnives;
+	if (!(totalKnives = g_arAllKnives.Length))
 		return Plugin_Continue;
 
 	CKnife knife;
@@ -348,7 +342,7 @@ void RevertEverything(int admin, int userid) {
 		if (g_cvSlayKnifer.BoolValue) {
 			if (knifer && IsPlayerAlive(knifer)) {
 				ForcePlayerSuicide(knifer);
-				FormatEx(message, sizeof(message), "{red}%s {default}has been slayed for knifing {olive}%s{default}.", knife.attackerName, knife.victimName);
+				FormatEx(message, sizeof(message), "{blue}%s {default}has been slayed for knifing {olive}%s{default}.", knife.attackerName, knife.victimName);
 				PrintCKnifeMessage(message);
 			}
 		}
@@ -369,12 +363,6 @@ void RevertEverything(int admin, int userid) {
 		for (int j = 0; j < knife.deadPeople.Length; j++) {
 			CKnifeRevert knifeRevert;
 			knife.deadPeople.GetArray(j, knifeRevert, sizeof(knifeRevert));
-
-			// Never revive the original knifer; they stay punished.
-			if (knifeRevert.humanId == knife.attackerUserId) {
-				continue;
-			}
-
 			int human = GetClientOfUserId(knifeRevert.humanId);
 			if (human) {
 				if (IsPlayerAlive(human)) {
@@ -600,15 +588,14 @@ void AddDeadHuman(int client, int attacker) {
 		return;
 	}
 
-	int clientUserId = GetClientUserId(client);
-	if (clientUserId == g_PlayerData[attacker].knifer) {
+	int humanId = GetClientUserId(client); 
+
+	if (humanId == g_PlayerData[attacker].knifer) {
 		return;
 	}
 
 	g_PlayerData[client].time = g_PlayerData[attacker].time;
 	g_PlayerData[client].knifer = g_PlayerData[attacker].knifer;
-
-	int humanId = clientUserId;
 
 	float humanOrigin[3];
 	GetClientAbsOrigin(client, humanOrigin);
