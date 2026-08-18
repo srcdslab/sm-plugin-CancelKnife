@@ -14,9 +14,9 @@ This repository contains a SourcePawn plugin for SourceMod called "CancelKnife" 
 
 ### Core Technologies
 - **Language**: SourcePawn (.sp files)
-- **Platform**: SourceMod 1.11+ (currently using 1.11.0-git6934)
-- **Build System**: sourceknight (Python-based dependency management and building)
-- **Compiler**: SourcePawn compiler (spcomp) via sourceknight
+- **Platform**: SourceMod 1.12
+- **Build System**: Native GitHub Actions workflow (no external build tool)
+- **Compiler**: SourcePawn compiler (spcomp), installed via `rumblefrog/setup-sp`
 - **CI/CD**: GitHub Actions with automatic releases
 
 ### Project Structure
@@ -28,14 +28,13 @@ This repository contains a SourcePawn plugin for SourceMod called "CancelKnife" 
   ├── workflows/ci.yml        # CI/CD pipeline
   └── dependabot.yml         # Dependency updates
 
-/sourceknight.yaml          # Build configuration and dependencies
 /.gitignore                # Git ignore rules
 ```
 
 ## Dependencies & Integration
 
-### Required Dependencies (via sourceknight.yaml)
-- **sourcemod**: Core SourceMod framework (1.11.0-git6934)
+### Required Dependencies (declared and cloned in .github/workflows/ci.yml)
+- **sourcemod**: Core SourceMod framework (1.12), provided by the setup-sp action
 - **multicolors**: Chat color formatting library
 - **zombiereloaded**: Zombie game mode framework
 - **KnockbackRestrict**: Knockback control system
@@ -105,13 +104,14 @@ RegAdminCmd("sm_cknife", Command_CKnife, ADMFLAG_KICK, "Description");
 ## Build & Development Workflow
 
 ### Local Development Setup
-1. **Install sourceknight**: `python3 -m pip install sourceknight`
-2. **Build plugin**: `sourceknight build` (from project root)
-3. **Output location**: `.sourceknight/package/addons/sourcemod/plugins/`
+1. **Install spcomp**: Use a SourceMod 1.12 `spcomp` binary (matching the CI compiler version)
+2. **Fetch dependency includes**: Clone each git dependency listed in `.github/workflows/ci.yml`'s "Install dependencies" step and copy its `include` files next to the plugin source, as that step does
+3. **Build plugin**: `spcomp -i include -o CancelKnife.smx CancelKnife.sp` (from `addons/sourcemod/scripting/`)
+4. **Output location**: `addons/sourcemod/plugins/CancelKnife.smx`
 
 ### CI/CD Pipeline
 - **Trigger**: Push, PR, or manual dispatch
-- **Build**: Uses `maxime1907/action-sourceknight@v1`
+- **Build**: Native GitHub Actions steps — `rumblefrog/setup-sp` installs spcomp, dependencies are cloned directly, and `spcomp` compiles the plugin
 - **Package**: Creates `.tar.gz` with compiled plugins
 - **Release**: Automatic releases on tags and main branch
 
@@ -191,7 +191,7 @@ g_hCheckAllKnivesTimer = CreateTimer(60.0, CheckAllKnives_Timer, _, TIMER_FLAG_N
 ### Version Control
 - **Semantic Versioning**: Follow MAJOR.MINOR.PATCH format
 - **Plugin Version**: Update version constant in plugin source
-- **Dependencies**: Keep sourceknight.yaml dependencies current
+- **Dependencies**: Keep the dependency clone list in `.github/workflows/ci.yml` current
 - **Testing**: Validate changes with full dependency chain
 
 ## Security Considerations
