@@ -88,7 +88,7 @@ public Plugin myinfo = {
 	name		= "Cancel Knife",
 	author		= "Dolly, .Rushaway",
 	description	= "Allows admins to cancel the knife and revert all things that happened caused by that knife",
-	version		= "1.8.0",
+	version		= "1.8.1",
 	url			= "https://github.com/srcdslab/sm-plugin-CancelKnife"
 };
 
@@ -418,7 +418,7 @@ void KR_Menu_OnLengthClick(int admin, int target, int time) {
 
 void PrintCKnifeMessage(const char[] message) {
 	if (g_cvPrintMessageType.IntValue == 0) {
-		CPrintToChatAll(message);
+		CPrintToChatAll("%s", message);
 	} else {
 		CPrintToChatAdmins(message);
 	}
@@ -429,7 +429,7 @@ void CPrintToChatAdmins(const char[] message) {
 		if (!IsClientInGame(i) || IsFakeClient(i) || !CheckCommandAccess(i, "sm_cknife", ADMFLAG_KICK)) {
 			continue;
 		}
-		CPrintToChat(i, message);
+		CPrintToChat(i, "%s", message);
 	}
 }
 
