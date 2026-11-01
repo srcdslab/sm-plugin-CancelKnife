@@ -88,7 +88,7 @@ public Plugin myinfo = {
 	name		= "Cancel Knife",
 	author		= "Dolly, .Rushaway",
 	description	= "Allows admins to cancel the knife and revert all things that happened caused by that knife",
-	version		= "1.8.1",
+	version		= "1.8.2",
 	url			= "https://github.com/srcdslab/sm-plugin-CancelKnife"
 };
 
@@ -105,6 +105,8 @@ public void OnPluginStart() {
 
 	HookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Pre);
 	HookEvent("round_start", Event_RoundStart);
+
+	LoadTranslations("CancelKnife.phrases");
 
 	CSetPrefix("{orchid}[Cancel Knife]{default}");
 
@@ -234,12 +236,12 @@ Action Command_CKnife(int client, int args) {
 	}
 
 	if (!g_bMotherZombie) {
-		CReplyToCommand(client, "Idiot, how come would there be knife actions if no zombie got infected yet?");
+		CReplyToCommand(client, "%t", "No Infection Yet");
 		return Plugin_Handled;
 	}
 
 	if (g_arAllKnives == null || g_arAllKnives.Length == 0) {
-		CReplyToCommand(client, "No active knives found!");
+		CReplyToCommand(client, "%t", "No Active Knives");
 		return Plugin_Handled;
 	}
 
@@ -254,7 +256,7 @@ Action Command_CKnife(int client, int args) {
 
 	int count = GetKnivesCount(targetName);
 	if (count < 1) {
-		CReplyToCommand(client, "No Active Knives were found with this name.");
+		CReplyToCommand(client, "%t", "No Active Knives For Name");
 		return Plugin_Handled;
 	}
 
@@ -264,7 +266,7 @@ Action Command_CKnife(int client, int args) {
 
 void OpenCKnifeMenu(int client, char[] targetName = "", bool fromMenu = false) {
 	Menu menu = new Menu(Menu_Callback);
-	menu.SetTitle("[Cancel Knife] Active Knives!");
+	menu.SetTitle("[Cancel Knife] %T", "Menu Title", client);
 
 	bool found = false;
 	int currentTime = GetTime();
@@ -277,8 +279,8 @@ void OpenCKnifeMenu(int client, char[] targetName = "", bool fromMenu = false) {
 		}
 
 		found = true;
-		char itemTitle[130];
-		FormatEx(itemTitle, sizeof(itemTitle), "[Expire in: %ds] Knifer: %s | Zombie: %s | Dead Humans: %d", knife.time - currentTime, knife.attackerName, knife.victimName, knife.deadPeople.Length);
+		char itemTitle[256];
+		FormatEx(itemTitle, sizeof(itemTitle), "%T", "Menu Knife Item", client, knife.time - currentTime, knife.attackerName, knife.victimName, knife.deadPeople.Length);
 
 		char itemInfo[8];
 		IntToString(knife.attackerUserId, itemInfo, sizeof(itemInfo));
@@ -289,7 +291,7 @@ void OpenCKnifeMenu(int client, char[] targetName = "", bool fromMenu = false) {
 	}
 
 	if (!fromMenu && !found) {
-		CPrintToChat(client, "No active knives found!");
+		CPrintToChat(client, "%t", "No Active Knives");
 	}
 
 	menu.ExitButton = true;
@@ -304,7 +306,7 @@ int Menu_Callback(Menu menu, MenuAction action, int param1, int param2) {
 
 		case MenuAction_Select: {
 			if (!g_bMotherZombie) {
-				CPrintToChat(param1, "Idiot, how come would there be knife actions if no zombie got infected yet?");
+				CPrintToChat(param1, "%t", "No Infection Yet");
 				return 0;
 			}
 
@@ -322,7 +324,6 @@ int Menu_Callback(Menu menu, MenuAction action, int param1, int param2) {
 
 void RevertEverything(int admin, int userid) {
 	bool found = false;
-	char message[256];
 
 	int currentTime = GetTime();
 	for (int i = 0; i < g_arAllKnives.Length; i++) {
@@ -341,15 +342,13 @@ void RevertEverything(int admin, int userid) {
 
 		found = true;
 
-		FormatEx(message, sizeof(message), "Canceling the Knife Action.. [{blue}%s {default}X {red}%s{default}]", knife.attackerName, knife.victimName);
-		CPrintToChatAdmins(message);
+		CPrintToChatAdmins("%t", "Canceling Knife Action", knife.attackerName, knife.victimName);
 
 		int knifer = GetClientOfUserId(userid);
 		if (g_cvSlayKnifer.BoolValue) {
 			if (knifer && IsPlayerAlive(knifer)) {
 				ForcePlayerSuicide(knifer);
-				FormatEx(message, sizeof(message), "{blue}%s {default}has been slayed for knifing {olive}%s{default}.", knife.attackerName, knife.victimName);
-				PrintCKnifeMessage(message);
+				PrintCKnifeMessage("%t", "Knifer Slayed", knife.attackerName, knife.victimName);
 			}
 		}
 
@@ -380,8 +379,7 @@ void RevertEverything(int admin, int userid) {
 
 				TeleportEntity(human, knifeRevert.pos);
 			} else {
-				FormatEx(message, sizeof(message), "Can't switch back {olive}%s {default}as human. The player is not alive.", knifeRevert.humanName);
-				CPrintToChatAdmins(message);
+				CPrintToChatAdmins("%t", "Cannot Revert Human", knifeRevert.humanName);
 			}
 		}
 
@@ -405,7 +403,7 @@ void RevertEverything(int admin, int userid) {
 	}
 
 	if (!found) {
-		CPrintToChat(admin, "You want to deal with this knife ? F*ck you, be faster next time.");
+		CPrintToChat(admin, "%t", "Knife Action Expired");
 	}
 }
 
@@ -416,19 +414,27 @@ void KR_Menu_OnLengthClick(int admin, int target, int time) {
 	KR_BanClient(admin, target, time, reason);
 }
 
-void PrintCKnifeMessage(const char[] message) {
-	if (g_cvPrintMessageType.IntValue == 0) {
-		CPrintToChatAll("%s", message);
-	} else {
-		CPrintToChatAdmins(message);
+void PrintCKnifeMessage(const char[] format, any ...) {
+	bool adminsOnly = g_cvPrintMessageType.IntValue != 0;
+	char message[256];
+	for (int i = 1; i <= MaxClients; i++) {
+		if (!IsClientInGame(i) || IsFakeClient(i) || (adminsOnly && !CheckCommandAccess(i, "sm_cknife", ADMFLAG_KICK))) {
+			continue;
+		}
+		SetGlobalTransTarget(i);
+		VFormat(message, sizeof(message), format, 2);
+		CPrintToChat(i, "%s", message);
 	}
 }
 
-void CPrintToChatAdmins(const char[] message) {
+void CPrintToChatAdmins(const char[] format, any ...) {
+	char message[256];
 	for (int i = 1; i <= MaxClients; i++) {
 		if (!IsClientInGame(i) || IsFakeClient(i) || !CheckCommandAccess(i, "sm_cknife", ADMFLAG_KICK)) {
 			continue;
 		}
+		SetGlobalTransTarget(i);
+		VFormat(message, sizeof(message), format, 2);
 		CPrintToChat(i, "%s", message);
 	}
 }
@@ -541,10 +547,8 @@ void PublishKnife(int victim, int attacker, int victimId, int attackerId, int cu
 		knife.zombiesPos[i].pos = origin;
 	}
 
-	char message[256];
-	FormatEx(message, sizeof(message), "New action available. ({blue}%s {default}X {red}%s{default})", knife.attackerName, knife.victimName);
-	CPrintToChatAdmins(message);
-	CPrintToChatAdmins("Quick revert: type {olive}-y {default}in chat to revert the latest knife.");
+	CPrintToChatAdmins("%t", "New Knife Action", knife.attackerName, knife.victimName);
+	CPrintToChatAdmins("%t", "Quick Revert Hint");
 
 	knife.deadPeople = new ArrayList(ByteCountToCells(64));
 	g_arAllKnives.PushArray(knife);
@@ -730,9 +734,7 @@ void ReviveHuman(int human) {
 	GiveGrenadesToClient(human, g_PlayerData[human].flash, GrenadeType_Flashbang);
 	GiveGrenadesToClient(human, g_PlayerData[human].smoke, GrenadeType_Smokegrenade);
 
-	char message[256];
-	FormatEx(message, sizeof(message), "The knife has been reverted. {olive}%N {default}has been revived as a {green}Human!", human);
-	PrintCKnifeMessage(message);
+	PrintCKnifeMessage("%t", "Human Revived", human);
 }
 
 #if defined _KnifeMode_Included

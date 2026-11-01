@@ -1,0 +1,129 @@
+"Phrases"
+{
+	"No Infection Yet"
+	{
+		"en"		"There are no knife actions to cancel: no zombie has been infected yet."
+		"fr"		"Il n'y a aucune action de knife à annuler : aucun zombie n'a encore été infecté."
+		"ru"		"Нет действий с ножом для отмены: ещё никто не был заражён."
+		"es"		"No hay acciones de cuchillo para cancelar: todavía no se ha infectado ningún zombi."
+		"de"		"Es gibt keine Messer-Aktionen zum Abbrechen: Es wurde noch kein Zombie infiziert."
+		"pt"		"Não há ações de faca para cancelar: nenhum zumbi foi infectado ainda."
+		"chi"		"没有可撤销的刀击操作：还没有人被感染成僵尸。"
+	}
+	"No Active Knives"
+	{
+		"en"		"No active knives found!"
+		"fr"		"Aucun knife actif trouvé !"
+		"ru"		"Активных действий с ножом не найдено!"
+		"es"		"¡No se encontraron acciones de cuchillo activas!"
+		"de"		"Keine aktiven Messer-Aktionen gefunden!"
+		"pt"		"Nenhuma ação de faca ativa encontrada!"
+		"chi"		"未找到有效的刀击操作！"
+	}
+	"No Active Knives For Name"
+	{
+		"en"		"No active knives were found with this name."
+		"fr"		"Aucun knife actif trouvé avec ce nom."
+		"ru"		"Активных действий с ножом для этого имени не найдено."
+		"es"		"No se encontraron acciones de cuchillo activas con este nombre."
+		"de"		"Keine aktiven Messer-Aktionen mit diesem Namen gefunden."
+		"pt"		"Nenhuma ação de faca ativa encontrada com esse nome."
+		"chi"		"未找到与该名称匹配的有效刀击操作。"
+	}
+	"Menu Title"
+	{
+		"en"		"Active Knives!"
+		"fr"		"Knifes actifs !"
+		"ru"		"Активные действия с ножом!"
+		"es"		"¡Acciones de cuchillo activas!"
+		"de"		"Aktive Messer-Aktionen!"
+		"pt"		"Ações de faca ativas!"
+		"chi"		"有效的刀击操作！"
+	}
+	"Menu Knife Item"
+	{
+		"#format"	"{1:d},{2:s},{3:s},{4:d}"
+		"en"		"[Expires in: {1}s] Knifer: {2} | Zombie: {3} | Dead Humans: {4}"
+		"fr"		"[Expire dans : {1}s] Knifeur : {2} | Zombie : {3} | Humains morts : {4}"
+		"ru"		"[Истекает через: {1} с] Ножевик: {2} | Зомби: {3} | Погибших людей: {4}"
+		"es"		"[Expira en: {1}s] Knifer: {2} | Zombi: {3} | Humanos muertos: {4}"
+		"de"		"[Läuft ab in: {1}s] Knifer: {2} | Zombie: {3} | Tote Menschen: {4}"
+		"pt"		"[Expira em: {1}s] Knifer: {2} | Zumbi: {3} | Humanos mortos: {4}"
+		"chi"		"[{1}秒后过期] 持刀者：{2} | 僵尸：{3} | 死亡人类：{4}"
+	}
+	"Canceling Knife Action"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"Canceling the knife action... [{blue}{1} {default}X {red}{2}{default}]"
+		"fr"		"Annulation de l'action de knife... [{blue}{1} {default}X {red}{2}{default}]"
+		"ru"		"Отмена действия с ножом... [{blue}{1} {default}X {red}{2}{default}]"
+		"es"		"Cancelando la acción de cuchillo... [{blue}{1} {default}X {red}{2}{default}]"
+		"de"		"Messer-Aktion wird abgebrochen... [{blue}{1} {default}X {red}{2}{default}]"
+		"pt"		"Cancelando a ação de faca... [{blue}{1} {default}X {red}{2}{default}]"
+		"chi"		"正在撤销刀击操作…… [{blue}{1} {default}X {red}{2}{default}]"
+	}
+	"Knifer Slayed"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"{blue}{1} {default}has been slayed for knifing {olive}{2}{default}."
+		"fr"		"{blue}{1} {default}a été tué pour avoir knifé {olive}{2}{default}."
+		"ru"		"{blue}{1} {default}убит за удар ножом по {olive}{2}{default}."
+		"es"		"{blue}{1} {default}ha sido eliminado por acuchillar a {olive}{2}{default}."
+		"de"		"{blue}{1} {default}wurde für das Messern von {olive}{2} {default}getötet."
+		"pt"		"{blue}{1} {default}foi morto por esfaquear {olive}{2}{default}."
+		"chi"		"{blue}{1} {default}因刀击 {olive}{2} {default}已被处死。"
+	}
+	"Cannot Revert Human"
+	{
+		"#format"	"{1:s}"
+		"en"		"Can't switch {olive}{1} {default}back to human. The player is not alive."
+		"fr"		"Impossible de remettre {olive}{1} {default}en humain. Le joueur n'est pas en vie."
+		"ru"		"Невозможно снова сделать {olive}{1} {default}человеком. Игрок мёртв."
+		"es"		"No se puede devolver a {olive}{1} {default}a humano. El jugador no está vivo."
+		"de"		"{olive}{1} {default}kann nicht wieder zum Menschen gemacht werden. Der Spieler lebt nicht."
+		"pt"		"Não foi possível voltar {olive}{1} {default}para humano. O jogador não está vivo."
+		"chi"		"无法将 {olive}{1} {default}恢复为人类。该玩家未存活。"
+	}
+	"Knife Action Expired"
+	{
+		"en"		"This knife action is no longer available. Please be faster next time."
+		"fr"		"Cette action de knife n'est plus disponible. Merci d'être plus rapide la prochaine fois."
+		"ru"		"Это действие с ножом больше недоступно. Пожалуйста, действуйте быстрее в следующий раз."
+		"es"		"Esta acción de cuchillo ya no está disponible. Por favor, sé más rápido la próxima vez."
+		"de"		"Diese Messer-Aktion ist nicht mehr verfügbar. Bitte beim nächsten Mal schneller sein."
+		"pt"		"Esta ação de faca não está mais disponível. Por favor, seja mais rápido da próxima vez."
+		"chi"		"该刀击操作已失效。下次请更快处理。"
+	}
+	"New Knife Action"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"New action available. ({blue}{1} {default}X {red}{2}{default})"
+		"fr"		"Nouvelle action disponible. ({blue}{1} {default}X {red}{2}{default})"
+		"ru"		"Доступно новое действие. ({blue}{1} {default}X {red}{2}{default})"
+		"es"		"Nueva acción disponible. ({blue}{1} {default}X {red}{2}{default})"
+		"de"		"Neue Aktion verfügbar. ({blue}{1} {default}X {red}{2}{default})"
+		"pt"		"Nova ação disponível. ({blue}{1} {default}X {red}{2}{default})"
+		"chi"		"有新的可撤销操作。（{blue}{1} {default}X {red}{2}{default}）"
+	}
+	"Quick Revert Hint"
+	{
+		"en"		"Quick revert: type {olive}-y {default}in chat to revert the latest knife."
+		"fr"		"Annulation rapide : tapez {olive}-y {default}dans le chat pour annuler le dernier knife."
+		"ru"		"Быстрая отмена: напишите {olive}-y {default}в чат, чтобы отменить последний удар ножом."
+		"es"		"Reversión rápida: escribe {olive}-y {default}en el chat para revertir el último cuchillazo."
+		"de"		"Schnelles Rückgängigmachen: Gib {olive}-y {default}im Chat ein, um das letzte Messern rückgängig zu machen."
+		"pt"		"Reversão rápida: digite {olive}-y {default}no chat para reverter a última facada."
+		"chi"		"快速撤销：在聊天中输入 {olive}-y {default}即可撤销最近一次刀击。"
+	}
+	"Human Revived"
+	{
+		"#format"	"{1:N}"
+		"en"		"The knife has been reverted. {olive}{1} {default}has been revived as a {green}Human!"
+		"fr"		"Le knife a été annulé. {olive}{1} {default}a été ressuscité en tant qu'{green}humain !"
+		"ru"		"Удар ножом отменён. {olive}{1} {default}возрождён как {green}человек!"
+		"es"		"El cuchillazo ha sido revertido. ¡{olive}{1} {default}ha revivido como {green}humano!"
+		"de"		"Das Messern wurde rückgängig gemacht. {olive}{1} {default}wurde als {green}Mensch {default}wiederbelebt!"
+		"pt"		"A facada foi revertida. {olive}{1} {default}foi revivido como {green}humano!"
+		"chi"		"刀击已撤销。{olive}{1} {default}已作为{green}人类{default}复活！"
+	}
+}
