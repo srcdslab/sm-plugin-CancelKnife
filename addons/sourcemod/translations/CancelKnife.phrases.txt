@@ -76,13 +76,13 @@
 	"Cannot Revert Human"
 	{
 		"#format"	"{1:s}"
-		"en"		"Can't switch {olive}{1} {default}back to human. The player is not alive."
-		"fr"		"Impossible de remettre {olive}{1} {default}en humain. Le joueur n'est pas en vie."
-		"ru"		"Невозможно снова сделать {olive}{1} {default}человеком. Игрок мёртв."
-		"es"		"No se puede devolver a {olive}{1} {default}a humano. El jugador no está vivo."
-		"de"		"{olive}{1} {default}kann nicht wieder zum Menschen gemacht werden. Der Spieler lebt nicht."
-		"pt"		"Não foi possível voltar {olive}{1} {default}para humano. O jogador não está vivo."
-		"chi"		"无法将 {olive}{1} {default}恢复为人类。该玩家未存活。"
+		"en"		"Can't switch {olive}{1} {default}back to human. The player has left the server."
+		"fr"		"Impossible de remettre {olive}{1} {default}en humain. Le joueur a quitté le serveur."
+		"ru"		"Невозможно снова сделать {olive}{1} {default}человеком. Игрок покинул сервер."
+		"es"		"No se puede devolver a {olive}{1} {default}a humano. El jugador salió del servidor."
+		"de"		"{olive}{1} {default}kann nicht wieder zum Menschen gemacht werden. Der Spieler hat den Server verlassen."
+		"pt"		"Não foi possível voltar {olive}{1} {default}para humano. O jogador saiu do servidor."
+		"chi"		"无法将 {olive}{1} {default}恢复为人类。该玩家已离开服务器。"
 	}
 	"Knife Action Expired"
 	{

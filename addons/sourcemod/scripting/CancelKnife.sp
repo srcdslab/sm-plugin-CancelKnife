@@ -88,7 +88,7 @@ public Plugin myinfo = {
 	name		= "Cancel Knife",
 	author		= "Dolly, .Rushaway",
 	description	= "Allows admins to cancel the knife and revert all things that happened caused by that knife",
-	version		= "1.8.2",
+	version		= "1.8.3",
 	url			= "https://github.com/srcdslab/sm-plugin-CancelKnife"
 };
 
