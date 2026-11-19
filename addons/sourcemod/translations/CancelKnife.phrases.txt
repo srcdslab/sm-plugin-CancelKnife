@@ -9,6 +9,12 @@
 		"de"		"Es gibt keine Messer-Aktionen zum Abbrechen: Es wurde noch kein Zombie infiziert."
 		"pt"		"Não há ações de faca para cancelar: nenhum zumbi foi infectado ainda."
 		"chi"		"没有可撤销的刀击操作：还没有人被感染成僵尸。"
+		"pl"		"Brak akcji nożem do anulowania: żaden zombie nie został jeszcze zainfekowany."
+		"tr"		"İptal edilecek bıçak işlemi yok: henüz hiçbir zombi enfekte edilmedi."
+		"it"		"Non ci sono azioni di coltello da annullare: nessuno zombie è ancora stato infettato."
+		"ua"		"Немає дій ножем для скасування: жодного зомбі ще не заражено."
+		"zho"		"沒有可取消的刀擊操作：目前還沒有殭屍被感染。"
+		"cze"		"Není co rušit: zatím nebyl nakažen žádný zombie."
 	}
 	"No Active Knives"
 	{
@@ -19,6 +25,12 @@
 		"de"		"Keine aktiven Messer-Aktionen gefunden!"
 		"pt"		"Nenhuma ação de faca ativa encontrada!"
 		"chi"		"未找到有效的刀击操作！"
+		"pl"		"Nie znaleziono aktywnych akcji nożem!"
+		"tr"		"Aktif bıçak işlemi bulunamadı!"
+		"it"		"Nessuna azione di coltello attiva trovata!"
+		"ua"		"Активних дій ножем не знайдено!"
+		"zho"		"找不到有效的刀擊操作！"
+		"cze"		"Nebyly nalezeny žádné aktivní bodnutí nožem!"
 	}
 	"No Active Knives For Name"
 	{
@@ -29,6 +41,12 @@
 		"de"		"Keine aktiven Messer-Aktionen mit diesem Namen gefunden."
 		"pt"		"Nenhuma ação de faca ativa encontrada com esse nome."
 		"chi"		"未找到与该名称匹配的有效刀击操作。"
+		"pl"		"Nie znaleziono aktywnych akcji nożem dla tej nazwy."
+		"tr"		"Bu isimle aktif bıçak işlemi bulunamadı."
+		"it"		"Nessuna azione di coltello attiva trovata con questo nome."
+		"ua"		"Активних дій ножем із цим ім'ям не знайдено."
+		"zho"		"找不到與此名稱相符的有效刀擊操作。"
+		"cze"		"Pro toto jméno nebyla nalezena žádná aktivní bodnutí nožem."
 	}
 	"Menu Title"
 	{
@@ -39,6 +57,12 @@
 		"de"		"Aktive Messer-Aktionen!"
 		"pt"		"Ações de faca ativas!"
 		"chi"		"有效的刀击操作！"
+		"pl"		"Aktywne akcje nożem!"
+		"tr"		"Aktif bıçak işlemleri!"
+		"it"		"Azioni di coltello attive!"
+		"ua"		"Активні дії ножем!"
+		"zho"		"有效的刀擊操作！"
+		"cze"		"Aktivní bodnutí nožem!"
 	}
 	"Menu Knife Item"
 	{
@@ -50,6 +74,12 @@
 		"de"		"[Läuft ab in: {1}s] Knifer: {2} | Zombie: {3} | Tote Menschen: {4}"
 		"pt"		"[Expira em: {1}s] Knifer: {2} | Zumbi: {3} | Humanos mortos: {4}"
 		"chi"		"[{1}秒后过期] 持刀者：{2} | 僵尸：{3} | 死亡人类：{4}"
+		"pl"		"[Wygasa za: {1}s] Nożownik: {2} | Zombie: {3} | Martwi ludzie: {4}"
+		"tr"		"[Bitmesine: {1}sn] Bıçaklayan: {2} | Zombi: {3} | Ölen insanlar: {4}"
+		"it"		"[Scade tra: {1}s] Accoltellatore: {2} | Zombie: {3} | Umani morti: {4}"
+		"ua"		"[Спливає за: {1}с] Той, хто вдарив: {2} | Зомбі: {3} | Мертві люди: {4}"
+		"zho"		"[剩餘時間：{1}秒] 刀擊者：{2} | 殭屍：{3} | 死亡人類：{4}"
+		"cze"		"[Vyprší za: {1}s] Bodající: {2} | Zombie: {3} | Mrtví lidé: {4}"
 	}
 	"Canceling Knife Action"
 	{
@@ -61,6 +91,12 @@
 		"de"		"Messer-Aktion wird abgebrochen... [{blue}{1} {default}X {red}{2}{default}]"
 		"pt"		"Cancelando a ação de faca... [{blue}{1} {default}X {red}{2}{default}]"
 		"chi"		"正在撤销刀击操作…… [{blue}{1} {default}X {red}{2}{default}]"
+		"pl"		"Anulowanie akcji nożem... [{blue}{1} {default}X {red}{2}{default}]"
+		"tr"		"Bıçak işlemi iptal ediliyor... [{blue}{1} {default}X {red}{2}{default}]"
+		"it"		"Annullamento dell'azione di coltello... [{blue}{1} {default}X {red}{2}{default}]"
+		"ua"		"Скасування дії ножем... [{blue}{1} {default}X {red}{2}{default}]"
+		"zho"		"正在取消刀擊操作... [{blue}{1} {default}X {red}{2}{default}]"
+		"cze"		"Ruším bodnutí nožem... [{blue}{1} {default}X {red}{2}{default}]"
 	}
 	"Knifer Slayed"
 	{
@@ -72,6 +108,12 @@
 		"de"		"{blue}{1} {default}wurde für das Messern von {olive}{2} {default}getötet."
 		"pt"		"{blue}{1} {default}foi morto por esfaquear {olive}{2}{default}."
 		"chi"		"{blue}{1} {default}因刀击 {olive}{2} {default}已被处死。"
+		"pl"		"{blue}{1} {default}został zabity za zadźganie {olive}{2}{default}."
+		"tr"		"{blue}{1} {default}, {olive}{2} {default}oyuncusunu bıçakladığı için öldürüldü."
+		"it"		"{blue}{1} {default}è stato ucciso per aver accoltellato {olive}{2}{default}."
+		"ua"		"{blue}{1} {default}було вбито за удар ножем по {olive}{2}{default}."
+		"zho"		"{blue}{1} {default}因刀擊 {olive}{2} {default}而被處死。"
+		"cze"		"{blue}{1} {default}byl zabit za bodnutí hráče {olive}{2}{default}."
 	}
 	"Cannot Revert Human"
 	{
@@ -83,6 +125,12 @@
 		"de"		"{olive}{1} {default}kann nicht wieder zum Menschen gemacht werden. Der Spieler hat den Server verlassen."
 		"pt"		"Não foi possível voltar {olive}{1} {default}para humano. O jogador saiu do servidor."
 		"chi"		"无法将 {olive}{1} {default}恢复为人类。该玩家已离开服务器。"
+		"pl"		"Nie można przywrócić {olive}{1} {default}na człowieka. Gracz opuścił serwer."
+		"tr"		"{olive}{1} {default}tekrar insana çevrilemiyor. Oyuncu sunucudan ayrıldı."
+		"it"		"Impossibile riportare {olive}{1} {default}a umano. Il giocatore ha lasciato il server."
+		"ua"		"Неможливо повернути {olive}{1} {default}до людей. Гравець покинув сервер."
+		"zho"		"無法將 {olive}{1} {default}變回人類，該玩家已離開伺服器。"
+		"cze"		"Nelze vrátit hráče {olive}{1} {default}zpět na člověka. Hráč opustil server."
 	}
 	"Knife Action Expired"
 	{
@@ -93,6 +141,12 @@
 		"de"		"Diese Messer-Aktion ist nicht mehr verfügbar. Bitte beim nächsten Mal schneller sein."
 		"pt"		"Esta ação de faca não está mais disponível. Por favor, seja mais rápido da próxima vez."
 		"chi"		"该刀击操作已失效。下次请更快处理。"
+		"pl"		"Ta akcja nożem nie jest już dostępna. Następnym razem bądź szybszy."
+		"tr"		"Bu bıçak işlemi artık geçerli değil. Bir dahaki sefere daha hızlı ol."
+		"it"		"Questa azione di coltello non è più disponibile. Sii più veloce la prossima volta."
+		"ua"		"Ця дія ножем більше недоступна. Наступного разу будьте швидшими."
+		"zho"		"此刀擊操作已失效，下次請動作快一點。"
+		"cze"		"Toto bodnutí nožem už není dostupné. Příště buďte rychlejší."
 	}
 	"New Knife Action"
 	{
@@ -104,6 +158,12 @@
 		"de"		"Neue Aktion verfügbar. ({blue}{1} {default}X {red}{2}{default})"
 		"pt"		"Nova ação disponível. ({blue}{1} {default}X {red}{2}{default})"
 		"chi"		"有新的可撤销操作。（{blue}{1} {default}X {red}{2}{default}）"
+		"pl"		"Dostępna nowa akcja. ({blue}{1} {default}X {red}{2}{default})"
+		"tr"		"Yeni işlem mevcut. ({blue}{1} {default}X {red}{2}{default})"
+		"it"		"Nuova azione disponibile. ({blue}{1} {default}X {red}{2}{default})"
+		"ua"		"Доступна нова дія. ({blue}{1} {default}X {red}{2}{default})"
+		"zho"		"有新的操作可用。({blue}{1} {default}X {red}{2}{default})"
+		"cze"		"Je dostupná nová akce. ({blue}{1} {default}X {red}{2}{default})"
 	}
 	"Quick Revert Hint"
 	{
@@ -114,6 +174,12 @@
 		"de"		"Schnelles Rückgängigmachen: Gib {olive}-y {default}im Chat ein, um das letzte Messern rückgängig zu machen."
 		"pt"		"Reversão rápida: digite {olive}-y {default}no chat para reverter a última facada."
 		"chi"		"快速撤销：在聊天中输入 {olive}-y {default}即可撤销最近一次刀击。"
+		"pl"		"Szybkie cofnięcie: wpisz {olive}-y {default}na czacie, aby cofnąć ostatnią akcję nożem."
+		"tr"		"Hızlı geri alma: son bıçak işlemini geri almak için sohbete {olive}-y {default}yazın."
+		"it"		"Annullamento rapido: scrivi {olive}-y {default}in chat per annullare l'ultimo colpo di coltello."
+		"ua"		"Швидке скасування: введіть {olive}-y {default}в чаті, щоб скасувати останній удар ножем."
+		"zho"		"快速還原：在聊天中輸入 {olive}-y {default}即可還原最近一次刀擊。"
+		"cze"		"Rychlé vrácení: napište do chatu {olive}-y {default}pro vrácení posledního bodnutí nožem."
 	}
 	"Human Revived"
 	{
@@ -125,5 +191,11 @@
 		"de"		"Das Messern wurde rückgängig gemacht. {olive}{1} {default}wurde als {green}Mensch {default}wiederbelebt!"
 		"pt"		"A facada foi revertida. {olive}{1} {default}foi revivido como {green}humano!"
 		"chi"		"刀击已撤销。{olive}{1} {default}已作为{green}人类{default}复活！"
+		"pl"		"Akcja nożem została cofnięta. {olive}{1} {default}został wskrzeszony jako {green}człowiek!"
+		"tr"		"Bıçak işlemi geri alındı. {olive}{1} {default}{green}İnsan {default}olarak diriltildi!"
+		"it"		"L'azione di coltello è stata annullata. {olive}{1} {default}è stato rianimato come {green}Umano!"
+		"ua"		"Дію ножем скасовано. {olive}{1} {default}воскрешено як {green}Людину!"
+		"zho"		"刀擊已還原。{olive}{1} {default}已復活為{green}人類！"
+		"cze"		"Bodnutí nožem bylo vráceno. Hráč {olive}{1} {default}byl oživen jako {green}člověk!"
 	}
 }
